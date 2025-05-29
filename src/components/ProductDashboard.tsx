@@ -1,28 +1,38 @@
 
 import React from 'react';
+import { Box } from '@mui/material';
 import { ProductProvider } from '@/contexts/ProductContext';
 import { Header } from '@/components/Header';
 import { ProductFilters } from '@/components/ProductFilters';
 import { ProductGrid } from '@/components/ProductGrid';
 import { ProductFormModal } from '@/components/ProductFormModal';
 import { DeleteConfirmDialog } from '@/components/DeleteConfirmDialog';
-import { Toaster } from '@/components/ui/toaster';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 export const ProductDashboard: React.FC = () => {
   return (
     <ErrorBoundary>
       <ProductProvider>
-        <div className="min-h-screen bg-gray-50">
+        <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
           <Header />
-          <main className="container mx-auto px-4 py-8 space-y-6">
+          <Box 
+            component="main" 
+            sx={{ 
+              maxWidth: '1200px', 
+              mx: 'auto', 
+              px: 2, 
+              py: 4, 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: 3 
+            }}
+          >
             <ProductFilters />
             <ProductGrid />
-          </main>
+          </Box>
           <ProductFormModal />
           <DeleteConfirmDialog />
-          <Toaster />
-        </div>
+        </Box>
       </ProductProvider>
     </ErrorBoundary>
   );

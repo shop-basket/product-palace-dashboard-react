@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogTitle, DialogContent, IconButton } from '@mui/material';
+import { Close } from '@mui/icons-material';
 import { ProductForm } from '@/components/ProductForm';
 import { useProducts } from '@/contexts/ProductContext';
 
@@ -8,13 +9,22 @@ export const ProductFormModal: React.FC = () => {
   const { state, closeFormModal } = useProducts();
 
   return (
-    <Dialog open={state.isFormModalOpen} onOpenChange={closeFormModal}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {state.editingProduct ? 'Edit Product' : 'Add New Product'}
-          </DialogTitle>
-        </DialogHeader>
+    <Dialog 
+      open={state.isFormModalOpen} 
+      onClose={closeFormModal}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        sx: { maxHeight: '90vh' }
+      }}
+    >
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {state.editingProduct ? 'Edit Product' : 'Add New Product'}
+        <IconButton onClick={closeFormModal}>
+          <Close />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent>
         <ProductForm
           product={state.editingProduct}
           onClose={closeFormModal}

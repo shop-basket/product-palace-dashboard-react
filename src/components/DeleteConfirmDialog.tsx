@@ -1,15 +1,13 @@
 
 import React from 'react';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
+} from '@mui/material';
 import { useProducts } from '@/contexts/ProductContext';
 
 export const DeleteConfirmDialog: React.FC = () => {
@@ -23,25 +21,25 @@ export const DeleteConfirmDialog: React.FC = () => {
   };
 
   return (
-    <AlertDialog open={state.isDeleteDialogOpen} onOpenChange={closeDeleteDialog}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the product{' '}
-            <strong>"{state.productToDelete?.name}"</strong> from your catalog.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleConfirmDelete}
-            className="bg-red-600 hover:bg-red-700"
-          >
-            Delete Product
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <Dialog open={state.isDeleteDialogOpen} onClose={closeDeleteDialog}>
+      <DialogTitle>Are you absolutely sure?</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          This action cannot be undone. This will permanently delete the product{' '}
+          <strong>"{state.productToDelete?.name}"</strong> from your catalog.
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={closeDeleteDialog}>Cancel</Button>
+        <Button
+          onClick={handleConfirmDelete}
+          color="error"
+          variant="contained"
+          autoFocus
+        >
+          Delete Product
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };

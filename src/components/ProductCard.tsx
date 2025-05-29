@@ -1,10 +1,17 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2 } from 'lucide-react';
+import { 
+  Card, 
+  CardContent, 
+  CardMedia, 
+  Typography, 
+  IconButton, 
+  Checkbox, 
+  Chip, 
+  Box,
+  Skeleton 
+} from '@mui/material';
+import { Edit, Delete } from '@mui/icons-material';
 import { Product } from '@/types/product';
 import { useProducts } from '@/contexts/ProductContext';
 import { formatCurrency } from '@/utils/currency';
@@ -22,14 +29,14 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) 
   const isOutOfStock = product.stockQuantity === 0;
   const isLowStock = product.stockQuantity > 0 && product.stockQuantity < 5;
 
-  const getStockBadge = () => {
+  const getStockChip = () => {
     if (isOutOfStock) {
-      return <Badge variant="destructive">Out of Stock</Badge>;
+      return <Chip label="Out of Stock" color="error" size="small" />;
     }
     if (isLowStock) {
-      return <Badge variant="secondary">Low Stock ({product.stockQuantity})</Badge>;
+      return <Chip label={`Low Stock (${product.stockQuantity})`} color="warning" size="small" />;
     }
-    return <Badge variant="default" className="bg-green-100 text-green-800">In Stock ({product.stockQuantity})</Badge>;
+    return <Chip label={`In Stock (${product.stockQuantity})`} color="success" size="small" />;
   };
 
   const handleImageLoad = () => {
@@ -47,81 +54,109 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) 
   };
 
   return (
-    <Card className={`group transition-all duration-200 hover:shadow-lg ${isSelected ? 'ring-2 ring-blue-500' : ''}`}>
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between mb-3">
+    <Card 
+      sx={{ 
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'all 0.2s',
+        '&:hover': {
+          boxShadow: 6,
+          '& .action-buttons': {
+            opacity: 1,
+          }
+        },
+        ...(isSelected && {
+          outline: 2,
+          outlineColor: 'primary.main',
+        })
+      }}
+    >
+      <CardContent sx={{ flexGrow: 1, p: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
           <Checkbox
             checked={isSelected}
-            onCheckedChange={() => toggleProductSelection(product.id)}
-            className="mt-1"
+            onChange={() => toggleProductSelection(product.id)}
           />
-          <div className="flex space-x-1">
-            <Button
-              variant="ghost"
-              size="sm"
+          <Box className="action-buttons" sx={{ opacity: 0, transition: 'opacity 0.2s', display: 'flex', gap: 0.5 }}>
+            <IconButton
+              size="small"
               onClick={() => openFormModal(product)}
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
+              <Edit fontSize="small" />
+            </IconButton>
+            <IconButton
+              size="small"
               onClick={() => openDeleteDialog(product)}
-              className="opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-700"
+              sx={{ color: 'error.main' }}
             >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+              <Delete fontSize="small" />
+            </IconButton>
+          </Box>
+        </Box>
 
-        <div className="aspect-square mb-4 bg-gray-100 rounded-lg overflow-hidden relative">
+        <Box sx={{ position: 'relative', mb: 2 }}>
           {imageLoading && (
-            <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+            <Skeleton variant="rectangular" width="100%" height={200} sx={{ borderRadius: 1 }} />
           )}
           {!imageError && product.imageUrl ? (
-            <img
-              src={product.imageUrl}
+            <CardMedia
+              component="img"
+              height="200"
+              image={product.imageUrl}
               alt={product.name}
-              className="w-full h-full object-cover"
               onLoad={handleImageLoad}
               onError={handleImageError}
-              loading="lazy"
+              sx={{ 
+                borderRadius: 1,
+                objectFit: 'cover',
+                display: imageLoading ? 'none' : 'block'
+              }}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gray-100">
-              <div className="text-gray-400 text-center">
-                <div className="w-16 h-16 mx-auto mb-2 bg-gray-200 rounded-lg flex items-center justify-center">
-                  📦
-                </div>
-                <p className="text-sm">No Image</p>
-              </div>
-            </div>
+            !imageLoading && (
+              <Box
+                sx={{
+                  height: 200,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  bgcolor: 'grey.100',
+                  borderRadius: 1,
+                  flexDirection: 'column',
+                }}
+              >
+                <Typography sx={{ fontSize: '2rem', mb: 1 }}>📦</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  No Image
+                </Typography>
+              </Box>
+            )
           )}
-        </div>
+        </Box>
 
-        <div className="space-y-2">
-          <h3 className="font-semibold text-lg text-gray-900">
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.125rem' }}>
             {truncateText(product.name, 30)}
-          </h3>
+          </Typography>
           
-          <div className="flex items-center justify-between">
-            <p className="text-2xl font-bold text-blue-600">
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
               {formatCurrency(product.price)}
-            </p>
-            {getStockBadge()}
-          </div>
+            </Typography>
+            {getStockChip()}
+          </Box>
 
-          <p className="text-sm text-gray-600">
+          <Typography variant="body2" color="text.secondary">
             Category: {product.category}
-          </p>
+          </Typography>
 
           {product.description && (
-            <p className="text-sm text-gray-600">
+            <Typography variant="body2" color="text.secondary">
               {truncateText(product.description, 80)}
-            </p>
+            </Typography>
           )}
-        </div>
+        </Box>
       </CardContent>
     </Card>
   );

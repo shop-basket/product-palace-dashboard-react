@@ -1,36 +1,23 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Grid, Card, CardContent, Skeleton } from '@mui/material';
 
 export const ProductGridSkeleton: React.FC = () => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <Grid container spacing={3}>
       {Array.from({ length: 6 }).map((_, index) => (
-        <Card key={index} className="animate-pulse">
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between mb-3">
-              <Skeleton className="h-4 w-4" />
-              <div className="flex space-x-1">
-                <Skeleton className="h-8 w-8" />
-                <Skeleton className="h-8 w-8" />
-              </div>
-            </div>
-            
-            <Skeleton className="aspect-square mb-4 rounded-lg" />
-            
-            <div className="space-y-2">
-              <Skeleton className="h-6 w-3/4" />
-              <div className="flex items-center justify-between">
-                <Skeleton className="h-8 w-20" />
-                <Skeleton className="h-6 w-16" />
-              </div>
-              <Skeleton className="h-4 w-1/2" />
-              <Skeleton className="h-4 w-full" />
-            </div>
-          </CardContent>
-        </Card>
+        <Grid item xs={12} sm={6} lg={4} key={index}>
+          <Card>
+            <CardContent sx={{ p: 2 }}>
+              <Skeleton variant="rectangular" width="100%" height={200} sx={{ mb: 2, borderRadius: 1 }} />
+              <Skeleton variant="text" width="75%" height={32} sx={{ mb: 1 }} />
+              <Skeleton variant="text" width="50%" height={24} sx={{ mb: 1 }} />
+              <Skeleton variant="text" width="100%" height={20} sx={{ mb: 1 }} />
+              <Skeleton variant="text" width="60%" height={20} />
+            </CardContent>
+          </Card>
+        </Grid>
       ))}
-    </div>
+    </Grid>
   );
 };

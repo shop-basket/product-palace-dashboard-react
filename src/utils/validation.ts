@@ -1,13 +1,26 @@
 
-import { ProductFormData } from '@/types/product';
+import { ProductCategory } from '@/types/product';
 
-interface ValidationResult {
-  isValid: boolean;
-  errors: Partial<ProductFormData>;
+interface FormData {
+  name: string;
+  price: string;
+  category: ProductCategory | '';
+  stockQuantity: string;
+  description: string;
+  imageUrl: string;
 }
 
-export const validateProductForm = (data: ProductFormData): ValidationResult => {
-  const errors: Partial<ProductFormData> = {};
+interface FormErrors {
+  name?: string;
+  price?: string;
+  category?: string;
+  stockQuantity?: string;
+  description?: string;
+  imageUrl?: string;
+}
+
+export const validateProductForm = (data: FormData): FormErrors => {
+  const errors: FormErrors = {};
 
   // Name validation
   if (!data.name.trim()) {
@@ -19,11 +32,11 @@ export const validateProductForm = (data: ProductFormData): ValidationResult => 
   }
 
   // Price validation
-  if (!data.price.trim()) {
+  if (!data.price) {
     errors.price = 'Price is required';
   } else {
     const price = parseFloat(data.price);
-    if (isNaN(price) || price < 0) {
+    if (isNaN(price) || price <= 0) {
       errors.price = 'Price must be a positive number';
     } else if (!/^\d+(\.\d{1,2})?$/.test(data.price)) {
       errors.price = 'Price must have at most 2 decimal places';
@@ -36,54 +49,28 @@ export const validateProductForm = (data: ProductFormData): ValidationResult => 
   }
 
   // Stock quantity validation
-  if (!data.stockQuantity.trim()) {
+  if (!data.stockQuantity) {
     errors.stockQuantity = 'Stock quantity is required';
   } else {
-    const stock = parseInt(data.stockQuantity);
-    if (isNaN(stock) || stock < 0) {
+    const quantity = parseInt(data.stockQuantity);
+    if (isNaN(quantity) || quantity < 0) {
       errors.stockQuantity = 'Stock quantity must be a non-negative integer';
-    } else if (!Number.isInteger(stock)) {
-      errors.stockQuantity = 'Stock quantity must be a whole number';
     }
   }
 
-  // Description validation (optional)
+  // Description validation (optional but with length limit)
   if (data.description && data.description.length > 200) {
     errors.description = 'Description must not exceed 200 characters';
   }
 
-  // Image URL validation (optional)
+  // Image URL validation (optional but must be valid URL if provided)
   if (data.imageUrl && data.imageUrl.trim()) {
     try {
-      new URL(data.imageUrl);
+      new URL(data.imageUrl.trim());
     } catch {
       errors.imageUrl = 'Please enter a valid URL';
     }
   }
 
-  return {
-    isValid: Object.keys(errors).length === 0,
-    errors,
-  };
-};
-
-export const validatePriceRange = (min: string, max: string): { isValid: boolean; error?: string } => {
-  if (!min && !max) return { isValid: true };
-
-  const minPrice = min ? parseFloat(min) : -Infinity;
-  const maxPrice = max ? parseFloat(max) : Infinity;
-
-  if (min && (isNaN(minPrice) || minPrice < 0)) {
-    return { isValid: false, error: 'Minimum price must be a positive number' };
-  }
-
-  if (max && (isNaN(maxPrice) || maxPrice < 0)) {
-    return { isValid: false, error: 'Maximum price must be a positive number' };
-  }
-
-  if (minPrice > maxPrice) {
-    return { isValid: false, error: 'Minimum price cannot be greater than maximum price' };
-  }
-
-  return { isValid: true };
+  return errors;
 };

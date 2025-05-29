@@ -1,12 +1,19 @@
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
-import { Product, ProductCategory, ProductFormData } from '@/types/product';
+import {
+  Box,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Button,
+  Typography,
+  Alert,
+  Grid,
+} from '@mui/material';
+import { Save, Cancel } from '@mui/icons-material';
+import { Product, ProductCategory } from '@/types/product';
 import { useProducts } from '@/contexts/ProductContext';
 import { validateProductForm } from '@/utils/validation';
 
@@ -15,21 +22,37 @@ interface ProductFormProps {
   onClose: () => void;
 }
 
-const categories: ProductCategory[] = ['Electronics', 'Clothing', 'Books', 'Home', 'Sports', 'Other'];
+interface FormData {
+  name: string;
+  price: string;
+  category: ProductCategory | '';
+  stockQuantity: string;
+  description: string;
+  imageUrl: string;
+}
 
-const initialFormData: ProductFormData = {
-  name: '',
-  price: '',
-  category: 'Electronics',
-  stockQuantity: '',
-  description: '',
-  imageUrl: '',
-};
+interface FormErrors {
+  name?: string;
+  price?: string;
+  category?: string;
+  stockQuantity?: string;
+  description?: string;
+  imageUrl?: string;
+}
+
+const categories: ProductCategory[] = ['Electronics', 'Clothing', 'Books', 'Home', 'Sports', 'Other'];
 
 export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) => {
   const { addProduct, updateProduct } = useProducts();
-  const [formData, setFormData] = useState<ProductFormData>(initialFormData);
-  const [errors, setErrors] = useState<Partial<ProductFormData>>({});
+  const [formData, setFormData] = useState<FormData>({
+    name: '',
+    price: '',
+    category: '',
+    stockQuantity: '',
+    description: '',
+    imageUrl: '',
+  });
+  const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -42,16 +65,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) =>
         description: product.description || '',
         imageUrl: product.imageUrl || '',
       });
-    } else {
-      setFormData(initialFormData);
     }
   }, [product]);
 
-  const handleInputChange = (field: keyof ProductFormData, value: string) => {
+  const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error for this field when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors(prev => ({ ...prev, [field]: undefined }));
     }
   };
 
@@ -59,9 +79,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) =>
     e.preventDefault();
     setIsSubmitting(true);
 
-    const validation = validateProductForm(formData);
-    if (!validation.isValid) {
-      setErrors(validation.errors);
+    const validationErrors = validateProductForm(formData);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       setIsSubmitting(false);
       return;
     }
@@ -70,167 +90,157 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) =>
       const productData = {
         name: formData.name.trim(),
         price: parseFloat(formData.price),
-        category: formData.category,
+        category: formData.category as ProductCategory,
         stockQuantity: parseInt(formData.stockQuantity),
         description: formData.description.trim() || undefined,
         imageUrl: formData.imageUrl.trim() || undefined,
       };
 
       if (product) {
-        updateProduct({ ...product, ...productData });
+        updateProduct(product.id, productData);
       } else {
         addProduct(productData);
       }
 
       onClose();
     } catch (error) {
-      console.error('Error saving product:', error);
+      console.error('Error submitting form:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleReset = () => {
-    setFormData(product ? {
-      name: product.name,
-      price: product.price.toString(),
-      category: product.category,
-      stockQuantity: product.stockQuantity.toString(),
-      description: product.description || '',
-      imageUrl: product.imageUrl || '',
-    } : initialFormData);
+    if (product) {
+      setFormData({
+        name: product.name,
+        price: product.price.toString(),
+        category: product.category,
+        stockQuantity: product.stockQuantity.toString(),
+        description: product.description || '',
+        imageUrl: product.imageUrl || '',
+      });
+    } else {
+      setFormData({
+        name: '',
+        price: '',
+        category: '',
+        stockQuantity: '',
+        description: '',
+        imageUrl: '',
+      });
+    }
     setErrors({});
   };
 
-  const remainingChars = 200 - formData.description.length;
+  const descriptionLength = formData.description.length;
+  const maxDescriptionLength = 200;
 
   return (
-    <Card>
-      <CardContent className="p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Product Name */}
-          <div>
-            <Label htmlFor="name">Product Name *</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-              placeholder="Enter product name"
-              className={errors.name ? 'border-red-500' : ''}
-            />
-            {errors.name && (
-              <p className="text-sm text-red-600 mt-1">{errors.name}</p>
-            )}
-          </div>
+    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label="Product Name"
+            value={formData.name}
+            onChange={(e) => handleInputChange('name', e.target.value)}
+            error={!!errors.name}
+            helperText={errors.name}
+            required
+          />
+        </Grid>
 
-          {/* Price */}
-          <div>
-            <Label htmlFor="price">Price *</Label>
-            <Input
-              id="price"
-              type="number"
-              min="0"
-              step="0.01"
-              value={formData.price}
-              onChange={(e) => handleInputChange('price', e.target.value)}
-              placeholder="0.00"
-              className={errors.price ? 'border-red-500' : ''}
-            />
-            {errors.price && (
-              <p className="text-sm text-red-600 mt-1">{errors.price}</p>
-            )}
-          </div>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Price"
+            type="number"
+            value={formData.price}
+            onChange={(e) => handleInputChange('price', e.target.value)}
+            error={!!errors.price}
+            helperText={errors.price}
+            inputProps={{ min: 0, step: 0.01 }}
+            required
+          />
+        </Grid>
 
-          {/* Category */}
-          <div>
-            <Label htmlFor="category">Category *</Label>
+        <Grid item xs={12} sm={6}>
+          <FormControl fullWidth error={!!errors.category} required>
+            <InputLabel>Category</InputLabel>
             <Select
               value={formData.category}
-              onValueChange={(value: ProductCategory) => handleInputChange('category', value)}
+              label="Category"
+              onChange={(e) => handleInputChange('category', e.target.value)}
             >
-              <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
-                <SelectValue placeholder="Select a category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
+              {categories.map((category) => (
+                <MenuItem key={category} value={category}>
+                  {category}
+                </MenuItem>
+              ))}
             </Select>
             {errors.category && (
-              <p className="text-sm text-red-600 mt-1">{errors.category}</p>
+              <Typography variant="caption" color="error" sx={{ mt: 0.5, mx: 1.75 }}>
+                {errors.category}
+              </Typography>
             )}
-          </div>
+          </FormControl>
+        </Grid>
 
-          {/* Stock Quantity */}
-          <div>
-            <Label htmlFor="stockQuantity">Stock Quantity *</Label>
-            <Input
-              id="stockQuantity"
-              type="number"
-              min="0"
-              value={formData.stockQuantity}
-              onChange={(e) => handleInputChange('stockQuantity', e.target.value)}
-              placeholder="0"
-              className={errors.stockQuantity ? 'border-red-500' : ''}
-            />
-            {errors.stockQuantity && (
-              <p className="text-sm text-red-600 mt-1">{errors.stockQuantity}</p>
-            )}
-          </div>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Stock Quantity"
+            type="number"
+            value={formData.stockQuantity}
+            onChange={(e) => handleInputChange('stockQuantity', e.target.value)}
+            error={!!errors.stockQuantity}
+            helperText={errors.stockQuantity}
+            inputProps={{ min: 0 }}
+            required
+          />
+        </Grid>
 
-          {/* Image URL */}
-          <div>
-            <Label htmlFor="imageUrl">Image URL</Label>
-            <Input
-              id="imageUrl"
-              type="url"
-              value={formData.imageUrl}
-              onChange={(e) => handleInputChange('imageUrl', e.target.value)}
-              placeholder="https://example.com/image.jpg"
-              className={errors.imageUrl ? 'border-red-500' : ''}
-            />
-            {errors.imageUrl && (
-              <p className="text-sm text-red-600 mt-1">{errors.imageUrl}</p>
-            )}
-          </div>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Image URL"
+            value={formData.imageUrl}
+            onChange={(e) => handleInputChange('imageUrl', e.target.value)}
+            error={!!errors.imageUrl}
+            helperText={errors.imageUrl}
+          />
+        </Grid>
 
-          {/* Description */}
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder="Enter product description (optional)"
-              maxLength={200}
-              rows={3}
-              className={errors.description ? 'border-red-500' : ''}
-            />
-            <div className="flex justify-between mt-1">
-              {errors.description && (
-                <p className="text-sm text-red-600">{errors.description}</p>
-              )}
-              <p className={`text-sm ml-auto ${remainingChars < 20 ? 'text-orange-600' : 'text-gray-500'}`}>
-                {remainingChars} characters remaining
-              </p>
-            </div>
-          </div>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label="Description"
+            multiline
+            rows={3}
+            value={formData.description}
+            onChange={(e) => handleInputChange('description', e.target.value)}
+            error={!!errors.description}
+            helperText={
+              errors.description || 
+              `${descriptionLength}/${maxDescriptionLength} characters`
+            }
+          />
+        </Grid>
 
-          {/* Form Actions */}
-          <div className="flex space-x-3 pt-4">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              {isSubmitting ? 'Saving...' : (product ? 'Update Product' : 'Add Product')}
-            </Button>
+        {Object.keys(errors).length > 0 && (
+          <Grid item xs={12}>
+            <Alert severity="error">
+              Please fix the errors above before submitting.
+            </Alert>
+          </Grid>
+        )}
+
+        <Grid item xs={12}>
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
             <Button
               type="button"
-              variant="outline"
+              variant="outlined"
               onClick={handleReset}
               disabled={isSubmitting}
             >
@@ -238,15 +248,24 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) =>
             </Button>
             <Button
               type="button"
-              variant="outline"
+              variant="outlined"
+              startIcon={<Cancel />}
               onClick={onClose}
               disabled={isSubmitting}
             >
               Cancel
             </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+            <Button
+              type="submit"
+              variant="contained"
+              startIcon={<Save />}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Saving...' : product ? 'Update Product' : 'Add Product'}
+            </Button>
+          </Box>
+        </Grid>
+      </Grid>
+    </Box>
   );
 };

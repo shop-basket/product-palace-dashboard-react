@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Grid, Box } from '@mui/material';
 import { ProductCard } from '@/components/ProductCard';
 import { ProductGridSkeleton } from '@/components/ProductGridSkeleton';
 import { EmptyState } from '@/components/EmptyState';
@@ -21,10 +22,12 @@ export const ProductGrid: React.FC = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <Grid container spacing={3}>
       {state.filteredProducts.map((product) => (
-        <ProductCard key={product.id} product={product} />
+        <Grid item xs={12} sm={6} lg={4} key={product.id}>
+          <ProductCard product={product} />
+        </Grid>
       ))}
-    </div>
+    </Grid>
   );
 };

@@ -1,44 +1,60 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Plus, Package } from 'lucide-react';
+import { 
+  AppBar, 
+  Toolbar, 
+  Typography, 
+  Button, 
+  Box, 
+  Chip,
+  Container 
+} from '@mui/material';
+import { Add, Package, Delete, Clear } from '@mui/icons-material';
 import { useProducts } from '@/contexts/ProductContext';
 
 export const Header: React.FC = () => {
   const { state, openFormModal, deleteSelectedProducts, clearSelection } = useProducts();
 
   return (
-    <header className="bg-white shadow-sm border-b">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Package className="h-8 w-8 text-blue-600" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Product Dashboard</h1>
-              <p className="text-sm text-gray-600">
+    <AppBar position="static" sx={{ bgcolor: 'background.paper', color: 'text.primary', boxShadow: 1 }}>
+      <Container maxWidth="xl">
+        <Toolbar sx={{ justifyContent: 'space-between', py: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Package sx={{ fontSize: 32, color: 'primary.main' }} />
+            <Box>
+              <Typography variant="h1" sx={{ fontSize: '1.5rem', fontWeight: 700, color: 'text.primary' }}>
+                Product Dashboard
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                 {state.filteredProducts.length} of {state.products.length} products
                 {state.selectedProducts.length > 0 && (
-                  <span className="ml-2 text-blue-600">
-                    ({state.selectedProducts.length} selected)
-                  </span>
+                  <Chip 
+                    label={`${state.selectedProducts.length} selected`}
+                    size="small"
+                    color="primary"
+                    sx={{ ml: 1 }}
+                  />
                 )}
-              </p>
-            </div>
-          </div>
+              </Typography>
+            </Box>
+          </Box>
           
-          <div className="flex items-center space-x-3">
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {state.selectedProducts.length > 0 && (
               <>
                 <Button
-                  variant="destructive"
-                  size="sm"
+                  variant="contained"
+                  color="error"
+                  size="small"
+                  startIcon={<Delete />}
                   onClick={deleteSelectedProducts}
                 >
                   Delete Selected ({state.selectedProducts.length})
                 </Button>
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant="outlined"
+                  size="small"
+                  startIcon={<Clear />}
                   onClick={clearSelection}
                 >
                   Clear Selection
@@ -46,15 +62,16 @@ export const Header: React.FC = () => {
               </>
             )}
             <Button
+              variant="contained"
+              color="primary"
+              startIcon={<Add />}
               onClick={() => openFormModal()}
-              className="bg-blue-600 hover:bg-blue-700"
             >
-              <Plus className="h-4 w-4 mr-2" />
               Add Product
             </Button>
-          </div>
-        </div>
-      </div>
-    </header>
+          </Box>
+        </Toolbar>
+      </Container>
+    </AppBar>
   );
 };

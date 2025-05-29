@@ -1,42 +1,32 @@
-
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { ThemeProvider } from '@mui/material/styles';
+import { theme } from '@/theme/muiTheme';
 import { ProductForm } from '@/components/ProductForm';
 import { ProductProvider } from '@/contexts/ProductContext';
-import { toast } from '@/hooks/use-toast';
 
-// Mock the toast
-jest.mock('@/hooks/use-toast', () => ({
-  toast: jest.fn(),
-}));
-
-// Mock localStorage
-const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  clear: jest.fn(),
-};
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock,
-});
-
-const MockedProductForm = ({ product = null, onClose = jest.fn() }) => (
-  <ProductProvider>
-    <ProductForm product={product} onClose={onClose} />
-  </ProductProvider>
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <ThemeProvider theme={theme}>
+    <ProductProvider>
+      {children}
+    </ProductProvider>
+  </ThemeProvider>
 );
 
-describe('ProductForm', () => {
-  const user = userEvent.setup();
+const mockOnClose = jest.fn();
 
+describe('ProductForm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    localStorageMock.getItem.mockReturnValue('[]');
+    mockOnClose.mockClear();
   });
 
   it('should render form with all required fields', () => {
-    render(<MockedProductForm />);
+    render(
+      <TestWrapper>
+        <ProductForm onClose={mockOnClose} />
+      </TestWrapper>
+    );
 
     expect(screen.getByLabelText(/product name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/price/i)).toBeInTheDocument();
@@ -47,7 +37,12 @@ describe('ProductForm', () => {
   });
 
   it('should show validation errors for invalid inputs', async () => {
-    render(<MockedProductForm />);
+    const user = userEvent.setup();
+    render(
+      <TestWrapper>
+        <ProductForm onClose={mockOnClose} />
+      </TestWrapper>
+    );
 
     const submitButton = screen.getByRole('button', { name: /add product/i });
     await user.click(submitButton);
@@ -55,24 +50,32 @@ describe('ProductForm', () => {
     await waitFor(() => {
       expect(screen.getByText(/product name is required/i)).toBeInTheDocument();
       expect(screen.getByText(/price is required/i)).toBeInTheDocument();
+      expect(screen.getByText(/category is required/i)).toBeInTheDocument();
       expect(screen.getByText(/stock quantity is required/i)).toBeInTheDocument();
+      expect(screen.getByText(/please fix the errors above/i)).toBeInTheDocument();
     });
   });
 
   it('should prevent submission with invalid data', async () => {
-    const onClose = jest.fn();
-    render(<MockedProductForm onClose={onClose} />);
+    render(
+      <TestWrapper>
+        <ProductForm onClose={mockOnClose} />
+      </TestWrapper>
+    );
 
     const submitButton = screen.getByRole('button', { name: /add product/i });
     await user.click(submitButton);
 
     // Form should not close and onClose should not be called
-    expect(onClose).not.toHaveBeenCalled();
+    expect(mockOnClose).not.toHaveBeenCalled();
   });
 
   it('should successfully add product with valid data', async () => {
-    const onClose = jest.fn();
-    render(<MockedProductForm onClose={onClose} />);
+    render(
+      <TestWrapper>
+        <ProductForm onClose={mockOnClose} />
+      </TestWrapper>
+    );
 
     // Fill in valid data
     await user.type(screen.getByLabelText(/product name/i), 'Test Product');
@@ -84,16 +87,16 @@ describe('ProductForm', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(toast).toHaveBeenCalledWith({
-        title: 'Success',
-        description: 'Product added successfully!',
-      });
-      expect(onClose).toHaveBeenCalled();
+      expect(mockOnClose).toHaveBeenCalled();
     });
   });
 
   it('should clear form after successful submission', async () => {
-    render(<MockedProductForm />);
+    render(
+      <TestWrapper>
+        <ProductForm onClose={mockOnClose} />
+      </TestWrapper>
+    );
 
     // Fill in data
     const nameInput = screen.getByLabelText(/product name/i);
@@ -110,7 +113,7 @@ describe('ProductForm', () => {
 
     // Form should be cleared (onClose will be called, which would unmount the form)
     await waitFor(() => {
-      expect(toast).toHaveBeenCalled();
+      expect(mockOnClose).toHaveBeenCalled();
     });
   });
 
@@ -127,7 +130,11 @@ describe('ProductForm', () => {
       updatedAt: new Date(),
     };
 
-    render(<MockedProductForm product={mockProduct} />);
+    render(
+      <TestWrapper>
+        <ProductForm product={mockProduct} onClose={mockOnClose} />
+      </TestWrapper>
+    );
 
     expect(screen.getByDisplayValue('Existing Product')).toBeInTheDocument();
     expect(screen.getByDisplayValue('19.99')).toBeInTheDocument();
@@ -137,7 +144,11 @@ describe('ProductForm', () => {
   });
 
   it('should validate name length constraints', async () => {
-    render(<MockedProductForm />);
+    render(
+      <TestWrapper>
+        <ProductForm onClose={mockOnClose} />
+      </TestWrapper>
+    );
 
     const nameInput = screen.getByLabelText(/product name/i);
     
@@ -161,7 +172,11 @@ describe('ProductForm', () => {
   });
 
   it('should validate price format', async () => {
-    render(<MockedProductForm />);
+    render(
+      <TestWrapper>
+        <ProductForm onClose={mockOnClose} />
+      </TestWrapper>
+    );
 
     const priceInput = screen.getByLabelText(/price/i);
     
@@ -185,13 +200,21 @@ describe('ProductForm', () => {
   });
 
   it('should show character counter for description', () => {
-    render(<MockedProductForm />);
+    render(
+      <TestWrapper>
+        <ProductForm onClose={mockOnClose} />
+      </TestWrapper>
+    );
 
     expect(screen.getByText(/200 characters remaining/i)).toBeInTheDocument();
   });
 
   it('should reset form when reset button is clicked', async () => {
-    render(<MockedProductForm />);
+    render(
+      <TestWrapper>
+        <ProductForm onClose={mockOnClose} />
+      </TestWrapper>
+    );
 
     const nameInput = screen.getByLabelText(/product name/i);
     await user.type(nameInput, 'Test Product');

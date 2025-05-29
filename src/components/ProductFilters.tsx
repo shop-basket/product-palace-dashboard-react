@@ -1,11 +1,20 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
-import { Search, X } from 'lucide-react';
+import { 
+  Card, 
+  CardContent, 
+  Grid, 
+  TextField, 
+  FormControl, 
+  InputLabel, 
+  Select, 
+  MenuItem, 
+  Button, 
+  Box, 
+  Typography,
+  InputAdornment 
+} from '@mui/material';
+import { Search, Clear } from '@mui/icons-material';
 import { useProducts } from '@/contexts/ProductContext';
 import { ProductCategory } from '@/types/product';
 
@@ -28,102 +37,102 @@ export const ProductFilters: React.FC = () => {
 
   return (
     <Card>
-      <CardContent className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <CardContent sx={{ p: 3 }}>
+        <Grid container spacing={3}>
           {/* Search */}
-          <div className="lg:col-span-2">
-            <Label htmlFor="search">Search Products</Label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                id="search"
-                placeholder="Search by name or description..."
-                value={filters.search}
-                onChange={(e) => handleFilterChange('search', e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Search Products"
+              placeholder="Search by name or description..."
+              value={filters.search}
+              onChange={(e) => handleFilterChange('search', e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
 
           {/* Category */}
-          <div>
-            <Label htmlFor="category">Category</Label>
-            <Select
-              value={filters.category}
-              onValueChange={(value) => handleFilterChange('category', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
+          <Grid item xs={12} md={6} lg={3}>
+            <FormControl fullWidth>
+              <InputLabel>Category</InputLabel>
+              <Select
+                value={filters.category}
+                label="Category"
+                onChange={(e) => handleFilterChange('category', e.target.value)}
+              >
                 {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
+                  <MenuItem key={category} value={category}>
                     {category}
-                  </SelectItem>
+                  </MenuItem>
                 ))}
-              </SelectContent>
-            </Select>
-          </div>
+              </Select>
+            </FormControl>
+          </Grid>
 
           {/* Price Range */}
-          <div className="space-y-2">
-            <Label>Price Range</Label>
-            <div className="flex space-x-2">
-              <Input
-                placeholder="Min"
+          <Grid item xs={12} md={6} lg={3}>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <TextField
+                label="Min Price"
                 type="number"
-                min="0"
-                step="0.01"
+                size="small"
+                inputProps={{ min: 0, step: 0.01 }}
                 value={filters.minPrice}
                 onChange={(e) => handleFilterChange('minPrice', e.target.value)}
+                sx={{ flex: 1 }}
               />
-              <Input
-                placeholder="Max"
+              <TextField
+                label="Max Price"
                 type="number"
-                min="0"
-                step="0.01"
+                size="small"
+                inputProps={{ min: 0, step: 0.01 }}
                 value={filters.maxPrice}
                 onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
+                sx={{ flex: 1 }}
               />
-            </div>
-          </div>
+            </Box>
+          </Grid>
 
           {/* Stock Status */}
-          <div>
-            <Label htmlFor="stockStatus">Stock Status</Label>
-            <Select
-              value={filters.stockStatus}
-              onValueChange={(value) => handleFilterChange('stockStatus', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
+          <Grid item xs={12} md={6} lg={3}>
+            <FormControl fullWidth>
+              <InputLabel>Stock Status</InputLabel>
+              <Select
+                value={filters.stockStatus}
+                label="Stock Status"
+                onChange={(e) => handleFilterChange('stockStatus', e.target.value)}
+              >
                 {stockStatuses.map((status) => (
-                  <SelectItem key={status} value={status}>
+                  <MenuItem key={status} value={status}>
                     {status}
-                  </SelectItem>
+                  </MenuItem>
                 ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
 
         {hasActiveFilters && (
-          <div className="mt-4 flex items-center justify-between">
-            <p className="text-sm text-gray-600">
+          <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               Active filters applied
-            </p>
+            </Typography>
             <Button
-              variant="outline"
-              size="sm"
+              variant="outlined"
+              size="small"
+              startIcon={<Clear />}
               onClick={clearFilters}
-              className="text-gray-600 hover:text-gray-900"
+              sx={{ color: 'text.secondary' }}
             >
-              <X className="h-4 w-4 mr-1" />
               Clear Filters
             </Button>
-          </div>
+          </Box>
         )}
       </CardContent>
     </Card>

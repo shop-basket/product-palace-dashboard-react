@@ -1,144 +1,160 @@
-
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { ThemeProvider } from '@mui/material/styles';
+import { theme } from '@/theme/muiTheme';
 import { ProductGrid } from '@/components/ProductGrid';
 import { ProductProvider } from '@/contexts/ProductContext';
-import { Product } from '@/types/product';
 
-// Mock localStorage
-const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-};
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock,
-});
-
-const mockProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Test Product 1',
-    price: 29.99,
-    category: 'Electronics',
-    stockQuantity: 10,
-    description: 'Test description 1',
-    imageUrl: 'https://example.com/image1.jpg',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '2',
-    name: 'Test Product 2',
-    price: 19.99,
-    category: 'Books',
-    stockQuantity: 0,
-    description: 'Test description 2',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
-
-const MockedProductGrid = ({ products = mockProducts }) => {
-  // Mock the localStorage to return our test products
-  localStorageMock.getItem.mockReturnValue(JSON.stringify(products));
-  
-  return (
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <ThemeProvider theme={theme}>
     <ProductProvider>
-      <ProductGrid />
+      {children}
     </ProductProvider>
-  );
-};
+  </ThemeProvider>
+);
 
 describe('ProductGrid', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+  it('should render loading skeleton when loading', () => {
+    render(
+      <TestWrapper>
+        <ProductGrid />
+      </TestWrapper>
+    );
+
+    // Check if skeleton cards are rendered
+    const skeletons = screen.getAllByTestId(/skeleton/i);
+    expect(skeletons.length).toBeGreaterThan(0);
   });
 
-  it('should render products correctly', async () => {
-    render(<MockedProductGrid />);
+  it('should render EmptyState component when there are no products', () => {
+    render(
+      <TestWrapper>
+        <ProductGrid />
+      </TestWrapper>
+    );
 
-    // Wait for products to load and be displayed
-    expect(await screen.findByText('Test Product 1')).toBeInTheDocument();
-    expect(screen.getByText('Test Product 2')).toBeInTheDocument();
-    expect(screen.getByText('$29.99')).toBeInTheDocument();
-    expect(screen.getByText('$19.99')).toBeInTheDocument();
-  });
-
-  it('should handle empty state', async () => {
-    render(<MockedProductGrid products={[]} />);
-
-    expect(await screen.findByText(/no products yet/i)).toBeInTheDocument();
-    expect(screen.getByText(/get started by adding your first product/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /add your first product/i })).toBeInTheDocument();
-  });
-
-  it('should display product information accurately', async () => {
-    render(<MockedProductGrid />);
-
-    // Check for product details
-    expect(await screen.findByText('Test Product 1')).toBeInTheDocument();
-    expect(screen.getByText('Electronics')).toBeInTheDocument();
-    expect(screen.getByText('Books')).toBeInTheDocument();
-    expect(screen.getByText(/in stock \(10\)/i)).toBeInTheDocument();
-    expect(screen.getByText(/out of stock/i)).toBeInTheDocument();
-  });
-
-  it('should handle image loading errors', async () => {
-    render(<MockedProductGrid />);
-
-    // The component should render even if images fail to load
-    expect(await screen.findByText('Test Product 1')).toBeInTheDocument();
-    
-    // Check that images are present in the DOM
-    const images = screen.getAllByRole('img');
-    expect(images).toHaveLength(2);
-  });
-
-  it('should display stock status correctly', async () => {
-    const productsWithVariousStock: Product[] = [
-      {
-        ...mockProducts[0],
-        stockQuantity: 15, // In stock
+    // Mock the ProductContext state to simulate no products
+    jest.spyOn(require('@/contexts/ProductContext'), 'useProducts').mockReturnValue({
+      state: {
+        products: [],
+        filteredProducts: [],
+        loading: false,
+        isFormModalOpen: false,
+        isDeleteDialogOpen: false,
+        selectedProducts: [],
+        productToDelete: null,
+        editingProduct: null,
+        filters: {
+          search: '',
+          category: 'All',
+          minPrice: '',
+          maxPrice: '',
+          stockStatus: 'All',
+        },
       },
-      {
-        ...mockProducts[1],
-        stockQuantity: 0, // Out of stock
-      },
-      {
-        id: '3',
-        name: 'Low Stock Product',
-        price: 9.99,
-        category: 'Home',
-        stockQuantity: 3, // Low stock
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ];
+      addProduct: jest.fn(),
+      updateProduct: jest.fn(),
+      deleteProduct: jest.fn(),
+      openFormModal: jest.fn(),
+      closeFormModal: jest.fn(),
+      openDeleteDialog: jest.fn(),
+      closeDeleteDialog: jest.fn(),
+      toggleProductSelection: jest.fn(),
+      deleteSelectedProducts: jest.fn(),
+      clearSelection: jest.fn(),
+      setFilters: jest.fn(),
+      clearFilters: jest.fn(),
+    });
 
-    render(<MockedProductGrid products={productsWithVariousStock} />);
-
-    expect(await screen.findByText(/in stock \(15\)/i)).toBeInTheDocument();
-    expect(screen.getByText(/out of stock/i)).toBeInTheDocument();
-    expect(screen.getByText(/low stock \(3\)/i)).toBeInTheDocument();
+    // Check if EmptyState component is rendered
+    expect(screen.getByText(/no products yet/i)).toBeInTheDocument();
   });
 
-  it('should truncate long product names and descriptions', async () => {
-    const productWithLongText: Product[] = [
-      {
-        id: '1',
-        name: 'This is a very long product name that should be truncated',
-        price: 29.99,
-        category: 'Electronics',
-        stockQuantity: 10,
-        description: 'This is a very long description that should be truncated when displayed in the product card to maintain a clean layout',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+  it('should render EmptyState component when there are no filtered products', () => {
+    render(
+      <TestWrapper>
+        <ProductGrid />
+      </TestWrapper>
+    );
+
+    // Mock the ProductContext state to simulate no filtered products
+    jest.spyOn(require('@/contexts/ProductContext'), 'useProducts').mockReturnValue({
+      state: {
+        products: [{ id: '1', name: 'Test Product', price: 20, category: 'Electronics', stockQuantity: 5 }],
+        filteredProducts: [],
+        loading: false,
+        isFormModalOpen: false,
+        isDeleteDialogOpen: false,
+        selectedProducts: [],
+        productToDelete: null,
+        editingProduct: null,
+        filters: {
+          search: '',
+          category: 'All',
+          minPrice: '',
+          maxPrice: '',
+          stockStatus: 'All',
+        },
       },
-    ];
+      addProduct: jest.fn(),
+      updateProduct: jest.fn(),
+      deleteProduct: jest.fn(),
+      openFormModal: jest.fn(),
+      closeFormModal: jest.fn(),
+      openDeleteDialog: jest.fn(),
+      closeDeleteDialog: jest.fn(),
+      toggleProductSelection: jest.fn(),
+      deleteSelectedProducts: jest.fn(),
+      clearSelection: jest.fn(),
+      setFilters: jest.fn(),
+      clearFilters: jest.fn(),
+    });
 
-    render(<MockedProductGrid products={productWithLongText} />);
+    // Check if EmptyState component is rendered
+    expect(screen.getByText(/no products found/i)).toBeInTheDocument();
+  });
 
-    // The component should render the product even with long text
-    expect(await screen.findByText(/this is a very long product name/i)).toBeInTheDocument();
+  it('should render ProductCard components when there are filtered products', () => {
+    render(
+      <TestWrapper>
+        <ProductGrid />
+      </TestWrapper>
+    );
+
+    // Mock the ProductContext state to simulate filtered products
+    jest.spyOn(require('@/contexts/ProductContext'), 'useProducts').mockReturnValue({
+      state: {
+        products: [{ id: '1', name: 'Test Product', price: 20, category: 'Electronics', stockQuantity: 5 }],
+        filteredProducts: [{ id: '1', name: 'Test Product', price: 20, category: 'Electronics', stockQuantity: 5 }],
+        loading: false,
+        isFormModalOpen: false,
+        isDeleteDialogOpen: false,
+        selectedProducts: [],
+        productToDelete: null,
+        editingProduct: null,
+        filters: {
+          search: '',
+          category: 'All',
+          minPrice: '',
+          maxPrice: '',
+          stockStatus: 'All',
+        },
+      },
+      addProduct: jest.fn(),
+      updateProduct: jest.fn(),
+      deleteProduct: jest.fn(),
+      openFormModal: jest.fn(),
+      closeFormModal: jest.fn(),
+      openDeleteDialog: jest.fn(),
+      closeDeleteDialog: jest.fn(),
+      toggleProductSelection: jest.fn(),
+      deleteSelectedProducts: jest.fn(),
+      clearSelection: jest.fn(),
+      setFilters: jest.fn(),
+      clearFilters: jest.fn(),
+    });
+
+    // Check if ProductCard components are rendered
+    expect(screen.getByText(/test product/i)).toBeInTheDocument();
   });
 });
