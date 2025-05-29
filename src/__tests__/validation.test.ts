@@ -1,6 +1,6 @@
 
 import { validateProductForm, validatePriceRange } from '@/utils/validation';
-import { ProductFormData } from '@/types/product';
+import { ProductFormData } from '@/utils/validation';
 
 describe('validateProductForm', () => {
   const validFormData: ProductFormData = {

@@ -1,7 +1,7 @@
 
 import { ProductCategory } from '@/types/product';
 
-interface FormData {
+export interface ProductFormData {
   name: string;
   price: string;
   category: ProductCategory | '';
@@ -10,7 +10,7 @@ interface FormData {
   imageUrl: string;
 }
 
-interface FormErrors {
+export interface FormErrors {
   name?: string;
   price?: string;
   category?: string;
@@ -19,7 +19,12 @@ interface FormErrors {
   imageUrl?: string;
 }
 
-export const validateProductForm = (data: FormData): FormErrors => {
+export interface ValidationResult {
+  isValid: boolean;
+  errors: FormErrors;
+}
+
+export const validateProductForm = (data: ProductFormData): ValidationResult => {
   const errors: FormErrors = {};
 
   // Name validation
@@ -72,5 +77,47 @@ export const validateProductForm = (data: FormData): FormErrors => {
     }
   }
 
-  return errors;
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors
+  };
+};
+
+export interface PriceRangeValidationResult {
+  isValid: boolean;
+  error?: string;
+}
+
+export const validatePriceRange = (minPrice: string, maxPrice: string): PriceRangeValidationResult => {
+  // If both are empty, validation passes
+  if (!minPrice && !maxPrice) {
+    return { isValid: true };
+  }
+
+  // Validate min price
+  if (minPrice) {
+    const min = parseFloat(minPrice);
+    if (isNaN(min) || min < 0) {
+      return { isValid: false, error: 'Minimum price must be a positive number' };
+    }
+  }
+
+  // Validate max price
+  if (maxPrice) {
+    const max = parseFloat(maxPrice);
+    if (isNaN(max) || max < 0) {
+      return { isValid: false, error: 'Maximum price must be a positive number' };
+    }
+  }
+
+  // Check if min is greater than max
+  if (minPrice && maxPrice) {
+    const min = parseFloat(minPrice);
+    const max = parseFloat(maxPrice);
+    if (min > max) {
+      return { isValid: false, error: 'Minimum price cannot be greater than maximum price' };
+    }
+  }
+
+  return { isValid: true };
 };
