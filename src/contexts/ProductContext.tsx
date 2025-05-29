@@ -3,7 +3,7 @@ import React, { createContext, useContext, useReducer, useEffect, useMemo, useCa
 import { Product, ProductState, ProductAction, ProductFilters } from '@/types/product';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useDebounce } from '@/hooks/useDebounce';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'react-toastify';
 
 const initialState: ProductState = {
   products: [],
@@ -93,7 +93,7 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [state, dispatch] = useReducer(productReducer, initialState);
   const [filters, setFilters] = React.useState<ProductFilters>(initialFilters);
   const [storedProducts, setStoredProducts] = useLocalStorage<Product[]>('ecommerce-products', []);
-  
+
   const debouncedSearch = useDebounce(filters.search, 300);
 
   // Load products from localStorage on mount
@@ -174,27 +174,18 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
       updatedAt: new Date(),
     };
     dispatch({ type: 'ADD_PRODUCT', payload: newProduct });
-    toast({
-      title: 'Success',
-      description: 'Product added successfully!',
-    });
+    toast.success("Product added successfully!")
   }, []);
 
   const updateProduct = useCallback((product: Product) => {
     const updatedProduct = { ...product, updatedAt: new Date() };
     dispatch({ type: 'UPDATE_PRODUCT', payload: updatedProduct });
-    toast({
-      title: 'Success',
-      description: 'Product updated successfully!',
-    });
+    toast.success('Product updated successfully!');
   }, []);
 
   const deleteProduct = useCallback((id: string) => {
     dispatch({ type: 'DELETE_PRODUCT', payload: id });
-    toast({
-      title: 'Success',
-      description: 'Product deleted successfully!',
-    });
+    toast.success("Product deleted successfully!")
   }, []);
 
   const deleteSelectedProducts = useCallback(() => {
@@ -202,10 +193,7 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
       dispatch({ type: 'DELETE_PRODUCT', payload: id });
     });
     dispatch({ type: 'CLEAR_SELECTION' });
-    toast({
-      title: 'Success',
-      description: `${state.selectedProducts.length} products deleted successfully!`,
-    });
+    toast.success(`${state.selectedProducts.length} products deleted successfully!`)
   }, [state.selectedProducts]);
 
   const openFormModal = useCallback((product?: Product) => {

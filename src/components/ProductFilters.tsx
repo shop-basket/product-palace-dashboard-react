@@ -1,18 +1,18 @@
 
 import React from 'react';
-import { 
-  Card, 
-  CardContent, 
-  Grid, 
-  TextField, 
-  FormControl, 
-  InputLabel, 
-  Select, 
-  MenuItem, 
-  Button, 
-  Box, 
+import {
+  Card,
+  CardContent,
+  Grid,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Button,
+  Box,
   Typography,
-  InputAdornment 
+  InputAdornment
 } from '@mui/material';
 import { Search, Clear } from '@mui/icons-material';
 import { useProducts } from '@/contexts/ProductContext';
@@ -28,11 +28,11 @@ export const ProductFilters: React.FC = () => {
     setFilters({ ...filters, [key]: value });
   };
 
-  const hasActiveFilters = 
-    filters.search || 
-    filters.category !== 'All' || 
-    filters.minPrice || 
-    filters.maxPrice || 
+  const hasActiveFilters =
+    filters.search ||
+    filters.category !== 'All' ||
+    filters.minPrice ||
+    filters.maxPrice ||
     filters.stockStatus !== 'All';
 
   return (
@@ -43,6 +43,7 @@ export const ProductFilters: React.FC = () => {
           <Grid item xs={12} md={6}>
             <TextField
               fullWidth
+              size='small'
               label="Search Products"
               placeholder="Search by name or description..."
               value={filters.search}
@@ -62,6 +63,7 @@ export const ProductFilters: React.FC = () => {
             <FormControl fullWidth>
               <InputLabel>Category</InputLabel>
               <Select
+                size='small'
                 value={filters.category}
                 label="Category"
                 onChange={(e) => handleFilterChange('category', e.target.value)}
@@ -79,9 +81,9 @@ export const ProductFilters: React.FC = () => {
           <Grid item xs={12} md={6} lg={3}>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <TextField
+                size='small'
                 label="Min Price"
                 type="number"
-                size="small"
                 inputProps={{ min: 0, step: 0.01 }}
                 value={filters.minPrice}
                 onChange={(e) => handleFilterChange('minPrice', e.target.value)}
@@ -90,7 +92,7 @@ export const ProductFilters: React.FC = () => {
               <TextField
                 label="Max Price"
                 type="number"
-                size="small"
+                size='small'
                 inputProps={{ min: 0, step: 0.01 }}
                 value={filters.maxPrice}
                 onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
@@ -104,6 +106,7 @@ export const ProductFilters: React.FC = () => {
             <FormControl fullWidth>
               <InputLabel>Stock Status</InputLabel>
               <Select
+                size='small'
                 value={filters.stockStatus}
                 label="Stock Status"
                 onChange={(e) => handleFilterChange('stockStatus', e.target.value)}

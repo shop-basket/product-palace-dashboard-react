@@ -7,33 +7,30 @@ import { ProductFilters } from '@/components/ProductFilters';
 import { ProductGrid } from '@/components/ProductGrid';
 import { ProductFormModal } from '@/components/ProductFormModal';
 import { DeleteConfirmDialog } from '@/components/DeleteConfirmDialog';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 export const ProductDashboard: React.FC = () => {
   return (
-    <ErrorBoundary>
-      <ProductProvider>
-        <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-          <Header />
-          <Box 
-            component="main" 
-            sx={{ 
-              maxWidth: '1200px', 
-              mx: 'auto', 
-              px: 2, 
-              py: 4, 
-              display: 'flex', 
-              flexDirection: 'column', 
-              gap: 3 
-            }}
-          >
-            <ProductFilters />
-            <ProductGrid />
-          </Box>
-          <ProductFormModal />
-          <DeleteConfirmDialog />
+    <ProductProvider>
+      <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+        <Header />
+        <Box
+          component="main"
+          sx={{
+            maxWidth: '1200px',
+            mx: 'auto',
+            px: 2,
+            py: 4,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 3
+          }}
+        >
+          <ProductFilters />
+          <ProductGrid />
         </Box>
-      </ProductProvider>
-    </ErrorBoundary>
+        <ProductFormModal />
+        <DeleteConfirmDialog />
+      </Box>
+    </ProductProvider>
   );
 };

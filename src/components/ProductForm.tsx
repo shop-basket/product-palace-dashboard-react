@@ -80,7 +80,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) =>
     setIsSubmitting(true);
 
     const validationErrors = validateProductForm(formData);
-    if (Object.keys(validationErrors).length > 0) {
+    console.log(validationErrors);
+
+    if (!validationErrors.isValid) {
       setErrors(validationErrors);
       setIsSubmitting(false);
       return;
@@ -138,10 +140,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) =>
 
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-      <Grid container spacing={3}>
+      <Grid container flexDirection={"column"} spacing={3}>
         <Grid item xs={12}>
           <TextField
             fullWidth
+            size='small'
             label="Product Name"
             value={formData.name}
             onChange={(e) => handleInputChange('name', e.target.value)}
@@ -153,6 +156,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) =>
 
         <Grid item xs={12} sm={6}>
           <TextField
+            size='small'
             fullWidth
             label="Price"
             type="number"
@@ -169,6 +173,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) =>
           <FormControl fullWidth error={!!errors.category} required>
             <InputLabel>Category</InputLabel>
             <Select
+              size='small'
               value={formData.category}
               label="Category"
               onChange={(e) => handleInputChange('category', e.target.value)}
@@ -190,6 +195,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) =>
         <Grid item xs={12} sm={6}>
           <TextField
             fullWidth
+            size='small'
             label="Stock Quantity"
             type="number"
             value={formData.stockQuantity}
@@ -204,6 +210,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) =>
         <Grid item xs={12} sm={6}>
           <TextField
             fullWidth
+            size='small'
             label="Image URL"
             value={formData.imageUrl}
             onChange={(e) => handleInputChange('imageUrl', e.target.value)}
@@ -215,6 +222,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) =>
         <Grid item xs={12}>
           <TextField
             fullWidth
+            size='small'
             label="Description"
             multiline
             rows={3}
@@ -222,19 +230,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) =>
             onChange={(e) => handleInputChange('description', e.target.value)}
             error={!!errors.description}
             helperText={
-              errors.description || 
+              errors.description ||
               `${descriptionLength}/${maxDescriptionLength} characters`
             }
           />
         </Grid>
 
-        {Object.keys(errors).length > 0 && (
-          <Grid item xs={12}>
-            <Alert severity="error">
-              Please fix the errors above before submitting.
-            </Alert>
-          </Grid>
-        )}
 
         <Grid item xs={12}>
           <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>

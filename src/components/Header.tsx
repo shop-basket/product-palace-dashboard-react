@@ -1,15 +1,15 @@
 
 import React from 'react';
-import { 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  Button, 
-  Box, 
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
   Chip,
-  Container 
+  Container
 } from '@mui/material';
-import { Add, Package, Delete, Clear } from '@mui/icons-material';
+import { Add, Inventory, Delete, Clear } from '@mui/icons-material';
 import { useProducts } from '@/contexts/ProductContext';
 
 export const Header: React.FC = () => {
@@ -20,7 +20,7 @@ export const Header: React.FC = () => {
       <Container maxWidth="xl">
         <Toolbar sx={{ justifyContent: 'space-between', py: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Package sx={{ fontSize: 32, color: 'primary.main' }} />
+            <Inventory sx={{ fontSize: 32, color: 'primary.main' }} />
             <Box>
               <Typography variant="h1" sx={{ fontSize: '1.5rem', fontWeight: 700, color: 'text.primary' }}>
                 Product Dashboard
@@ -28,7 +28,7 @@ export const Header: React.FC = () => {
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                 {state.filteredProducts.length} of {state.products.length} products
                 {state.selectedProducts.length > 0 && (
-                  <Chip 
+                  <Chip
                     label={`${state.selectedProducts.length} selected`}
                     size="small"
                     color="primary"
@@ -38,7 +38,7 @@ export const Header: React.FC = () => {
               </Typography>
             </Box>
           </Box>
-          
+
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {state.selectedProducts.length > 0 && (
               <>
